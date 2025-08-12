@@ -1,0 +1,2143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Finance Command Center - Advanced Edition</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- React and ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX transformation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- PapaParse for CSV parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
+    <!-- Math.js for financial calculations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
+    
+    <!-- XLSX for Excel export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 255, 214, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 0, 128, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                linear-gradient(180deg, #0a0a0a 0%, #1a0f1f 100%);
+            z-index: -1;
+        }
+        
+        /* Noise texture overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255, 255, 255, 0.03) 2px, rgba(255, 255, 255, 0.03) 4px);
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .glass {
+            background: linear-gradient(135deg, rgba(18, 18, 18, 0.8) 0%, rgba(25, 25, 35, 0.8) 100%);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-dark {
+            background: linear-gradient(135deg, rgba(10, 10, 10, 0.9) 0%, rgba(20, 15, 25, 0.9) 100%);
+            backdrop-filter: blur(20px) saturate(150%);
+            -webkit-backdrop-filter: blur(20px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Neon glow effects */
+        .neon-cyan {
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.8), 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+        
+        .neon-pink {
+            color: #ff0080;
+            text-shadow: 0 0 10px rgba(255, 0, 128, 0.8), 0 0 20px rgba(255, 0, 128, 0.5);
+        }
+        
+        .neon-green {
+            color: #78ffd6;
+            text-shadow: 0 0 10px rgba(120, 255, 214, 0.8), 0 0 20px rgba(120, 255, 214, 0.5);
+        }
+        
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: 0 0 5px rgba(0, 255, 255, 0.5), 0 0 10px rgba(0, 255, 255, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(0, 255, 255, 0.8), 0 0 30px rgba(0, 255, 255, 0.5);
+            }
+        }
+        
+        .animate-slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        .animate-glow {
+            animation: glow 2s ease-in-out infinite;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #00ffff, #ff0080);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #78ffd6, #ff0080);
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            border: 3px solid rgba(0, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 3px solid #00ffff;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Chart container */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        /* Tooltip styles */
+        .tooltip {
+            position: absolute;
+            background: linear-gradient(135deg, rgba(10, 10, 10, 0.95) 0%, rgba(30, 20, 40, 0.95) 100%);
+            color: #00ffff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 255, 255, 0.3);
+        }
+        
+        /* Progress bar */
+        .progress-bar {
+            height: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #78ffd6);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+        
+        .progress-fill.danger {
+            background: linear-gradient(90deg, #ff0080, #ff4060);
+            box-shadow: 0 0 10px rgba(255, 0, 128, 0.5);
+        }
+        
+        /* Card hover effects */
+        .card-hover {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-hover::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .card-hover:hover::before {
+            left: 100%;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 
+                0 10px 40px rgba(0, 255, 255, 0.3),
+                0 0 20px rgba(255, 0, 128, 0.2);
+            border-color: rgba(0, 255, 255, 0.5);
+        }
+        
+        /* Button styles */
+        .btn-primary {
+            background: linear-gradient(135deg, #00ffff 0%, #0080ff 100%);
+            color: #000;
+            font-weight: 600;
+            border: none;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            box-shadow: 0 4px 20px rgba(0, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #ff0080 0%, #ff4060 100%);
+            color: #fff;
+            font-weight: 600;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 0 4px 20px rgba(255, 0, 128, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: #00ffff;
+            border: 1px solid rgba(0, 255, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline:hover {
+            background: rgba(0, 255, 255, 0.1);
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+        
+        /* Input styling */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            opacity: 1;
+            height: 40px;
+        }
+        
+        input, select {
+            background: rgba(0, 0, 0, 0.5) !important;
+            border: 1px solid rgba(0, 255, 255, 0.2) !important;
+            color: #fff !important;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #00ffff !important;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+        
+        /* Alert styles */
+        .alert-success {
+            background: linear-gradient(135deg, rgba(120, 255, 214, 0.2) 0%, rgba(0, 255, 128, 0.2) 100%);
+            border: 1px solid rgba(120, 255, 214, 0.5);
+            box-shadow: 0 4px 20px rgba(120, 255, 214, 0.2);
+        }
+        
+        .alert-warning {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.2) 0%, rgba(255, 152, 0, 0.2) 100%);
+            border: 1px solid rgba(255, 193, 7, 0.5);
+            box-shadow: 0 4px 20px rgba(255, 193, 7, 0.2);
+        }
+        
+        .alert-error {
+            background: linear-gradient(135deg, rgba(255, 0, 128, 0.2) 0%, rgba(255, 64, 96, 0.2) 100%);
+            border: 1px solid rgba(255, 0, 128, 0.5);
+            box-shadow: 0 4px 20px rgba(255, 0, 128, 0.2);
+        }
+        
+        /* Tab active state */
+        .tab-active {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 128, 255, 0.2) 100%);
+            border: 1px solid rgba(0, 255, 255, 0.5);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+        
+        /* Grid lines effect */
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useRef, useCallback } = React;
+        
+        // Icon component
+        const Icon = ({ name, className = "" }) => {
+            useEffect(() => {
+                lucide.createIcons();
+            }, []);
+            return <i data-lucide={name} className={className}></i>;
+        };
+        
+        // Chart Component wrapper
+        const ChartComponent = ({ type, data, options, id }) => {
+            const canvasRef = useRef(null);
+            const chartRef = useRef(null);
+            
+            useEffect(() => {
+                if (canvasRef.current && data) {
+                    const ctx = canvasRef.current.getContext('2d');
+                    
+                    if (chartRef.current) {
+                        chartRef.current.destroy();
+                    }
+                    
+                    chartRef.current = new Chart(ctx, {
+                        type: type,
+                        data: data,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            ...options
+                        }
+                    });
+                }
+                
+                return () => {
+                    if (chartRef.current) {
+                        chartRef.current.destroy();
+                    }
+                };
+            }, [type, data, options]);
+            
+            return (
+                <div className="chart-container">
+                    <canvas ref={canvasRef} id={id}></canvas>
+                </div>
+            );
+        };
+        
+        // Main Finance Command Center Component
+        const FinanceCommandCenter = () => {
+            // State Management
+            const [activeTab, setActiveTab] = useState('dashboard');
+            const [loading, setLoading] = useState(false);
+            const [notifications, setNotifications] = useState([]);
+            const [darkMode, setDarkMode] = useState(false);
+            
+            // Financial Data States
+            const [transactions, setTransactions] = useState([]);
+            const [accounts, setAccounts] = useState([
+                { name: 'Checking', balance: 5420.50, type: 'checking', number: '****1234' },
+                { name: 'Savings', balance: 25780.75, type: 'savings', number: '****5678' },
+                { name: 'Investment', balance: 45250.00, type: 'investment', number: '****9012' }
+            ]);
+            
+            const [budgetEnvelopes, setBudgetEnvelopes] = useState([
+                { category: 'Housing', budget: 2000, spent: 1850, color: '#00ffff', icon: 'home' },
+                { category: 'Food', budget: 600, spent: 523, color: '#78ffd6', icon: 'coffee' },
+                { category: 'Transportation', budget: 400, spent: 380, color: '#ff0080', icon: 'car' },
+                { category: 'Entertainment', budget: 300, spent: 150, color: '#ff4060', icon: 'tv' },
+                { category: 'Healthcare', budget: 200, spent: 175, color: '#ffd700', icon: 'heart' },
+                { category: 'Shopping', budget: 400, spent: 220, color: '#ff00ff', icon: 'shopping-bag' },
+                { category: 'Utilities', budget: 200, spent: 190, color: '#0080ff', icon: 'zap' },
+                { category: 'Savings', budget: 1000, spent: 1000, color: '#00ff80', icon: 'piggy-bank' }
+            ]);
+            
+            const [investmentPortfolio, setInvestmentPortfolio] = useState([
+                { asset: 'Stocks', value: 50000, target: 60, actual: 0, change: 5.2 },
+                { asset: 'Bonds', value: 30000, target: 30, actual: 0, change: 1.8 },
+                { asset: 'Real Estate', value: 15000, target: 8, actual: 0, change: 3.5 },
+                { asset: 'Crypto', value: 3000, target: 1, actual: 0, change: -8.3 },
+                { asset: 'Cash', value: 2000, target: 1, actual: 0, change: 0 }
+            ]);
+            
+            const [debts, setDebts] = useState([
+                { name: 'Credit Card 1', balance: 5000, rate: 19.99, minimum: 150, paid: 200 },
+                { name: 'Credit Card 2', balance: 3000, rate: 22.99, minimum: 90, paid: 100 },
+                { name: 'Car Loan', balance: 15000, rate: 5.99, minimum: 350, paid: 400 },
+                { name: 'Student Loan', balance: 25000, rate: 4.5, minimum: 280, paid: 300 },
+                { name: 'Mortgage', balance: 180000, rate: 3.75, minimum: 1200, paid: 1200 }
+            ]);
+            
+            const [goals, setGoals] = useState([
+                { name: 'Emergency Fund', target: 15000, current: 8500, deadline: '2024-12-31', priority: 'high' },
+                { name: 'Vacation', target: 5000, current: 2300, deadline: '2024-07-01', priority: 'medium' },
+                { name: 'New Car', target: 30000, current: 5000, deadline: '2025-06-30', priority: 'low' },
+                { name: 'Home Renovation', target: 20000, current: 1000, deadline: '2025-12-31', priority: 'medium' }
+            ]);
+            
+            const [retirementParams, setRetirementParams] = useState({
+                currentAge: 35,
+                retirementAge: 65,
+                currentSavings: 100000,
+                monthlyContribution: 1000,
+                expectedReturn: 7,
+                inflationRate: 2.5,
+                lifeExpectancy: 85,
+                retirementSpending: 60000
+            });
+            
+            const [taxParams, setTaxParams] = useState({
+                income: 85000,
+                filingStatus: 'single',
+                deductions: 12950,
+                stateTax: 5.5,
+                propertyTax: 3200,
+                dependents: 0
+            });
+            
+            const [cryptoPortfolio, setCryptoPortfolio] = useState([
+                { symbol: 'BTC', name: 'Bitcoin', amount: 0.05, value: 2150, change24h: 3.2 },
+                { symbol: 'ETH', name: 'Ethereum', amount: 0.5, value: 850, change24h: -1.5 },
+                { symbol: 'ADA', name: 'Cardano', amount: 1000, value: 450, change24h: 5.8 }
+            ]);
+            
+            // Enhanced Naive Bayes Classifier
+            const naiveBayesClassifier = useMemo(() => {
+                const trainingData = [
+                    { text: 'walmart grocery store food kroger safeway whole foods trader joes', category: 'Food' },
+                    { text: 'restaurant cafe coffee starbucks mcdonalds burger pizza sushi bar', category: 'Food' },
+                    { text: 'rent mortgage property landlord apartment lease homeowner hoa', category: 'Housing' },
+                    { text: 'gas station shell exxon fuel chevron bp mobil car maintenance oil', category: 'Transportation' },
+                    { text: 'uber lyft taxi transit bus subway metro train airline flight', category: 'Transportation' },
+                    { text: 'netflix spotify hulu entertainment movie theater concert sports game', category: 'Entertainment' },
+                    { text: 'doctor hospital pharmacy medical cvs walgreens dental vision insurance', category: 'Healthcare' },
+                    { text: 'amazon target shopping mall store clothing shoes electronics best buy', category: 'Shopping' },
+                    { text: 'electric gas water utility internet phone verizon att comcast spectrum', category: 'Utilities' },
+                    { text: 'airline hotel vacation travel airbnb booking expedia resort cruise', category: 'Travel' },
+                    { text: 'gym fitness yoga pilates crossfit membership sports equipment', category: 'Fitness' },
+                    { text: 'school university college tuition books education course training', category: 'Education' },
+                    { text: 'savings investment deposit transfer withdrawal atm bank', category: 'Savings' }
+                ];
+                
+                const categoryWords = {};
+                const categoryCount = {};
+                
+                trainingData.forEach(item => {
+                    const words = item.text.toLowerCase().split(' ');
+                    if (!categoryWords[item.category]) {
+                        categoryWords[item.category] = {};
+                        categoryCount[item.category] = 0;
+                    }
+                    categoryCount[item.category]++;
+                    words.forEach(word => {
+                        categoryWords[item.category][word] = (categoryWords[item.category][word] || 0) + 1;
+                    });
+                });
+                
+                return { categoryWords, categoryCount, total: trainingData.length };
+            }, []);
+            
+            // Enhanced categorization with confidence score
+            const categorizeTransaction = (description) => {
+                if (!description) return { category: 'Other', confidence: 0 };
+                
+                const words = description.toLowerCase().split(/\s+/);
+                let maxScore = -Infinity;
+                let bestCategory = 'Other';
+                let scores = {};
+                
+                Object.keys(naiveBayesClassifier.categoryWords).forEach(category => {
+                    let score = Math.log(naiveBayesClassifier.categoryCount[category] / naiveBayesClassifier.total);
+                    
+                    words.forEach(word => {
+                        const wordCount = naiveBayesClassifier.categoryWords[category][word] || 0.1;
+                        const totalWords = Object.values(naiveBayesClassifier.categoryWords[category]).reduce((a, b) => a + b, 0);
+                        score += Math.log(wordCount / totalWords);
+                    });
+                    
+                    scores[category] = score;
+                    if (score > maxScore) {
+                        maxScore = score;
+                        bestCategory = category;
+                    }
+                });
+                
+                // Calculate confidence as relative probability
+                const expScores = Object.values(scores).map(s => Math.exp(s));
+                const sumExpScores = expScores.reduce((a, b) => a + b, 0);
+                const confidence = Math.exp(maxScore) / sumExpScores;
+                
+                return { category: bestCategory, confidence: confidence * 100 };
+            };
+            
+            // Add notification
+            const addNotification = (message, type = 'info') => {
+                const id = Date.now();
+                setNotifications(prev => [...prev, { id, message, type }]);
+                setTimeout(() => {
+                    setNotifications(prev => prev.filter(n => n.id !== id));
+                }, 5000);
+            };
+            
+            // Enhanced file upload with validation
+            const handleFileUpload = (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                if (file.size > 10485760) { // 10MB limit
+                    addNotification('File size exceeds 10MB limit', 'error');
+                    return;
+                }
+                
+                setLoading(true);
+                
+                Papa.parse(file, {
+                    header: true,
+                    dynamicTyping: true,
+                    skipEmptyLines: true,
+                    complete: (results) => {
+                        try {
+                            const processedTransactions = results.data.map((row, index) => {
+                                const amount = Math.abs(parseFloat(row.Amount || row.amount || row.Debit || row.Credit || 0));
+                                const description = row.Description || row.description || row.Merchant || row.merchant || '';
+                                const date = row.Date || row.date || new Date().toISOString().split('T')[0];
+                                const { category, confidence } = categorizeTransaction(description);
+                                const isDebit = row.Debit || (row.Amount && row.Amount < 0) || (row.Type && row.Type.toLowerCase() === 'debit');
+                                
+                                return {
+                                    id: `txn_${Date.now()}_${index}`,
+                                    date,
+                                    description,
+                                    amount,
+                                    category,
+                                    confidence,
+                                    type: isDebit ? 'expense' : 'income',
+                                    account: row.Account || 'Checking',
+                                    tags: [],
+                                    notes: '',
+                                    recurring: false
+                                };
+                            }).filter(t => t.amount > 0);
+                            
+                            setTransactions(processedTransactions);
+                            updateBudgetSpending(processedTransactions);
+                            detectRecurringTransactions(processedTransactions);
+                            addNotification(`Successfully imported ${processedTransactions.length} transactions`, 'success');
+                        } catch (error) {
+                            addNotification('Error processing CSV file', 'error');
+                            console.error(error);
+                        } finally {
+                            setLoading(false);
+                        }
+                    },
+                    error: (error) => {
+                        addNotification('Error reading CSV file', 'error');
+                        console.error(error);
+                        setLoading(false);
+                    }
+                });
+            };
+            
+            // Detect recurring transactions
+            const detectRecurringTransactions = (txns) => {
+                const grouped = {};
+                txns.forEach(t => {
+                    const key = `${t.description.substring(0, 20)}_${t.amount}`;
+                    if (!grouped[key]) grouped[key] = [];
+                    grouped[key].push(t);
+                });
+                
+                Object.values(grouped).forEach(group => {
+                    if (group.length >= 2) {
+                        group.forEach(t => t.recurring = true);
+                    }
+                });
+            };
+            
+            // Update budget spending
+            const updateBudgetSpending = (txns) => {
+                const spending = {};
+                txns.forEach(t => {
+                    if (t.type === 'expense') {
+                        spending[t.category] = (spending[t.category] || 0) + t.amount;
+                    }
+                });
+                
+                setBudgetEnvelopes(prev => prev.map(env => ({
+                    ...env,
+                    spent: spending[env.category] || env.spent
+                })));
+            };
+            
+            // Enhanced anomaly detection with multiple methods
+            const detectAnomalies = () => {
+                if (transactions.length === 0) return [];
+                
+                const amounts = transactions.map(t => t.amount);
+                const mean = math.mean(amounts);
+                const std = math.std(amounts);
+                const median = math.median(amounts);
+                const mad = math.median(amounts.map(a => Math.abs(a - median)));
+                
+                return transactions.filter(t => {
+                    // Z-score method
+                    const zScore = Math.abs((t.amount - mean) / std);
+                    // Modified Z-score using MAD
+                    const modifiedZScore = Math.abs(0.6745 * (t.amount - median) / mad);
+                    // IQR method
+                    const q1 = math.quantileSeq(amounts, 0.25);
+                    const q3 = math.quantileSeq(amounts, 0.75);
+                    const iqr = q3 - q1;
+                    const isOutlier = t.amount < (q1 - 1.5 * iqr) || t.amount > (q3 + 1.5 * iqr);
+                    
+                    return zScore > 2.5 || modifiedZScore > 3.5 || isOutlier;
+                });
+            };
+            
+            // Enhanced Monte Carlo simulation
+            const runMonteCarloSimulation = (runs = 5000) => {
+                const { currentAge, retirementAge, currentSavings, monthlyContribution, expectedReturn, inflationRate, lifeExpectancy, retirementSpending } = retirementParams;
+                const yearsToRetirement = retirementAge - currentAge;
+                const yearsInRetirement = lifeExpectancy - retirementAge;
+                const results = [];
+                
+                for (let i = 0; i < runs; i++) {
+                    let balance = currentSavings;
+                    let currentMonthlyContribution = monthlyContribution; // Create a mutable copy
+                    
+                    // Accumulation phase
+                    for (let year = 0; year < yearsToRetirement; year++) {
+                        // Market returns with volatility
+                        const marketVolatility = 0.15;
+                        const returnRate = expectedReturn / 100 + (Math.random() - 0.5) * marketVolatility;
+                        const realReturn = returnRate - (inflationRate / 100);
+                        
+                        balance = balance * (1 + realReturn) + currentMonthlyContribution * 12;
+                        
+                        // Increase contributions with inflation
+                        currentMonthlyContribution *= (1 + inflationRate / 100);
+                    }
+                    
+                    // Distribution phase
+                    let retirementBalance = balance;
+                    for (let year = 0; year < yearsInRetirement; year++) {
+                        const marketReturn = expectedReturn / 100 + (Math.random() - 0.5) * 0.15;
+                        const inflation = inflationRate / 100 + (Math.random() - 0.5) * 0.01;
+                        
+                        retirementBalance = retirementBalance * (1 + marketReturn) - retirementSpending * (1 + inflation) ** year;
+                        
+                        if (retirementBalance <= 0) {
+                            results.push({ balance: 0, ranOut: retirementAge + year });
+                            break;
+                        }
+                    }
+                    
+                    if (retirementBalance > 0) {
+                        results.push({ balance: retirementBalance, ranOut: null });
+                    }
+                }
+                
+                const balances = results.map(r => r.balance);
+                balances.sort((a, b) => a - b);
+                const successRate = results.filter(r => r.ranOut === null).length / runs * 100;
+                
+                return {
+                    median: balances[Math.floor(runs * 0.5)],
+                    percentile25: balances[Math.floor(runs * 0.25)],
+                    percentile75: balances[Math.floor(runs * 0.75)],
+                    percentile95: balances[Math.floor(runs * 0.95)],
+                    average: math.mean(balances),
+                    successRate: successRate
+                };
+            };
+            
+            // Financial calculations
+            const calculateNPV = (cashFlows, discountRate) => {
+                return cashFlows.reduce((npv, cf, i) => {
+                    return npv + cf / Math.pow(1 + discountRate, i);
+                }, 0);
+            };
+            
+            const calculateIRR = (cashFlows) => {
+                let rate = 0.1;
+                let tolerance = 0.00001;
+                let maxIterations = 100;
+                
+                for (let i = 0; i < maxIterations; i++) {
+                    let npv = calculateNPV(cashFlows, rate);
+                    let npvPrime = cashFlows.reduce((sum, cf, j) => {
+                        return sum - j * cf / Math.pow(1 + rate, j + 1);
+                    }, 0);
+                    
+                    let newRate = rate - npv / npvPrime;
+                    if (Math.abs(newRate - rate) < tolerance) {
+                        return newRate * 100;
+                    }
+                    rate = newRate;
+                }
+                return rate * 100;
+            };
+            
+            // Calculate loan amortization
+            const calculateAmortization = (principal, rate, months) => {
+                const monthlyRate = rate / 100 / 12;
+                const payment = principal * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+                
+                let balance = principal;
+                const schedule = [];
+                
+                for (let month = 1; month <= months; month++) {
+                    const interest = balance * monthlyRate;
+                    const principalPayment = payment - interest;
+                    balance -= principalPayment;
+                    
+                    schedule.push({
+                        month,
+                        payment: payment.toFixed(2),
+                        principal: principalPayment.toFixed(2),
+                        interest: interest.toFixed(2),
+                        balance: Math.max(0, balance).toFixed(2)
+                    });
+                }
+                
+                return { payment, schedule };
+            };
+            
+            // Enhanced debt strategies
+            const calculateDebtStrategies = () => {
+                const strategies = {};
+                
+                // Avalanche method
+                const avalancheSorted = [...debts].sort((a, b) => b.rate - a.rate);
+                strategies.avalanche = calculateDebtPayoff(avalancheSorted, 'avalanche');
+                
+                // Snowball method
+                const snowballSorted = [...debts].sort((a, b) => a.balance - b.balance);
+                strategies.snowball = calculateDebtPayoff(snowballSorted, 'snowball');
+                
+                // Hybrid method (psychological + mathematical)
+                const hybridSorted = [...debts].sort((a, b) => {
+                    const aScore = (a.balance / 1000) + (20 - a.rate);
+                    const bScore = (b.balance / 1000) + (20 - b.rate);
+                    return aScore - bScore;
+                });
+                strategies.hybrid = calculateDebtPayoff(hybridSorted, 'hybrid');
+                
+                return strategies;
+            };
+            
+            const calculateDebtPayoff = (sortedDebts, method) => {
+                const extraPayment = 500;
+                let totalInterest = 0;
+                let months = 0;
+                let remainingDebts = sortedDebts.map(d => ({ ...d }));
+                const payoffOrder = [];
+                
+                while (remainingDebts.some(d => d.balance > 0)) {
+                    months++;
+                    let availableExtra = extraPayment;
+                    
+                    remainingDebts.forEach((debt, index) => {
+                        if (debt.balance > 0) {
+                            const interest = (debt.balance * debt.rate / 100) / 12;
+                            totalInterest += interest;
+                            
+                            let payment = debt.minimum;
+                            if (availableExtra > 0 && debt === remainingDebts.find(d => d.balance > 0)) {
+                                payment += availableExtra;
+                                availableExtra = 0;
+                            }
+                            
+                            debt.balance = Math.max(0, debt.balance + interest - payment);
+                            
+                            if (debt.balance === 0 && !payoffOrder.includes(debt.name)) {
+                                payoffOrder.push({ name: debt.name, month: months });
+                            }
+                        }
+                    });
+                    
+                    if (months > 360) break; // Safety limit
+                }
+                
+                return { months, totalInterest, method, payoffOrder };
+            };
+            
+            // Enhanced tax calculation
+            const estimateTaxes = () => {
+                const { income, deductions, filingStatus, stateTax, propertyTax, dependents } = taxParams;
+                const standardDeduction = filingStatus === 'married' ? 25900 : 12950;
+                const totalDeductions = Math.max(standardDeduction, deductions + propertyTax);
+                const taxableIncome = Math.max(0, income - totalDeductions);
+                
+                // 2024 tax brackets
+                const brackets = filingStatus === 'married' ? [
+                    { min: 0, max: 22000, rate: 0.10 },
+                    { min: 22000, max: 89450, rate: 0.12 },
+                    { min: 89450, max: 190750, rate: 0.22 },
+                    { min: 190750, max: 364200, rate: 0.24 },
+                    { min: 364200, max: 462500, rate: 0.32 },
+                    { min: 462500, max: 693750, rate: 0.35 },
+                    { min: 693750, max: Infinity, rate: 0.37 }
+                ] : [
+                    { min: 0, max: 11000, rate: 0.10 },
+                    { min: 11000, max: 44725, rate: 0.12 },
+                    { min: 44725, max: 95375, rate: 0.22 },
+                    { min: 95375, max: 182050, rate: 0.24 },
+                    { min: 182050, max: 231250, rate: 0.32 },
+                    { min: 231250, max: 578125, rate: 0.35 },
+                    { min: 578125, max: Infinity, rate: 0.37 }
+                ];
+                
+                let federalTax = 0;
+                brackets.forEach(bracket => {
+                    if (taxableIncome > bracket.min) {
+                        const taxableInBracket = Math.min(taxableIncome - bracket.min, bracket.max - bracket.min);
+                        federalTax += taxableInBracket * bracket.rate;
+                    }
+                });
+                
+                // Child tax credit
+                const childTaxCredit = Math.min(dependents * 2000, federalTax);
+                federalTax -= childTaxCredit;
+                
+                // State tax
+                const stateTaxAmount = taxableIncome * (stateTax / 100);
+                
+                // FICA taxes
+                const socialSecurity = Math.min(income, 160200) * 0.062;
+                const medicare = income * 0.0145;
+                const additionalMedicare = income > 200000 ? (income - 200000) * 0.009 : 0;
+                
+                const totalTax = federalTax + stateTaxAmount + socialSecurity + medicare + additionalMedicare;
+                
+                return {
+                    federalTax,
+                    stateTax: stateTaxAmount,
+                    socialSecurity,
+                    medicare: medicare + additionalMedicare,
+                    totalTax,
+                    effectiveRate: (totalTax / income) * 100,
+                    afterTaxIncome: income - totalTax,
+                    marginalRate: brackets.find(b => taxableIncome >= b.min && taxableIncome < b.max)?.rate * 100,
+                    taxableIncome,
+                    deductions: totalDeductions,
+                    credits: childTaxCredit
+                };
+            };
+            
+            // Portfolio rebalancing with tax considerations
+            const calculateRebalancing = () => {
+                const totalValue = investmentPortfolio.reduce((sum, asset) => sum + asset.value, 0);
+                
+                return investmentPortfolio.map(asset => {
+                    const actualPercentage = (asset.value / totalValue) * 100;
+                    const targetValue = (asset.target / 100) * totalValue;
+                    const difference = targetValue - asset.value;
+                    
+                    // Tax implications
+                    const taxRate = 0.15; // Long-term capital gains
+                    const taxCost = difference < 0 ? Math.abs(difference) * taxRate : 0;
+                    
+                    return {
+                        ...asset,
+                        actual: actualPercentage,
+                        targetValue,
+                        action: difference > 0 ? 'Buy' : 'Sell',
+                        amount: Math.abs(difference),
+                        taxCost,
+                        netAmount: Math.abs(difference) - taxCost
+                    };
+                });
+            };
+            
+            // Export comprehensive report to Excel
+            const exportToExcel = () => {
+                const wb = XLSX.utils.book_new();
+                
+                // Summary sheet
+                const summary = [
+                    { Metric: 'Total Assets', Value: accounts.reduce((sum, a) => sum + a.balance, 0) },
+                    { Metric: 'Total Debt', Value: debts.reduce((sum, d) => sum + d.balance, 0) },
+                    { Metric: 'Net Worth', Value: accounts.reduce((sum, a) => sum + a.balance, 0) - debts.reduce((sum, d) => sum + d.balance, 0) },
+                    { Metric: 'Monthly Income', Value: transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0) / 12 },
+                    { Metric: 'Monthly Expenses', Value: transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0) / 12 },
+                    { Metric: 'Savings Rate', Value: ((transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0) - transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0)) / transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0) * 100).toFixed(2) + '%' }
+                ];
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summary), "Summary");
+                
+                // Accounts sheet
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(accounts), "Accounts");
+                
+                // Transactions sheet
+                if (transactions.length > 0) {
+                    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(transactions), "Transactions");
+                }
+                
+                // Budget sheet
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(budgetEnvelopes), "Budget");
+                
+                // Portfolio sheet
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(calculateRebalancing()), "Portfolio");
+                
+                // Debts sheet
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(debts), "Debts");
+                
+                // Goals sheet
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(goals), "Goals");
+                
+                // Tax calculation
+                const taxData = estimateTaxes();
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([taxData]), "Tax Estimate");
+                
+                XLSX.writeFile(wb, `FinancialReport_${new Date().toISOString().split('T')[0]}.xlsx`);
+                addNotification('Financial report exported successfully', 'success');
+            };
+            
+            // Calculate financial health score
+            const calculateFinancialHealth = () => {
+                let score = 0;
+                let factors = [];
+                
+                try {
+                    // Emergency fund (20 points)
+                    const emergencyFund = accounts.find(a => a.type === 'savings')?.balance || 0;
+                    const monthlyExpenses = Math.max(1, budgetEnvelopes.reduce((sum, e) => sum + e.spent, 0));
+                    const emergencyMonths = emergencyFund / monthlyExpenses;
+                    if (emergencyMonths >= 6) {
+                        score += 20;
+                        factors.push({ name: 'Emergency Fund', score: 20, status: 'excellent' });
+                    } else if (emergencyMonths >= 3) {
+                        score += 15;
+                        factors.push({ name: 'Emergency Fund', score: 15, status: 'good' });
+                    } else {
+                        const emergencyScore = Math.min(20, emergencyMonths * 3.33);
+                        score += emergencyScore;
+                        factors.push({ name: 'Emergency Fund', score: emergencyScore, status: 'needs improvement' });
+                    }
+                    
+                    // Debt-to-income ratio (20 points)
+                    const totalDebt = debts.reduce((sum, d) => sum + d.balance, 0);
+                    const annualIncome = Math.max(1, taxParams.income);
+                    const debtRatio = totalDebt / annualIncome;
+                    if (debtRatio < 0.2) {
+                        score += 20;
+                        factors.push({ name: 'Debt Ratio', score: 20, status: 'excellent' });
+                    } else if (debtRatio < 0.4) {
+                        score += 15;
+                        factors.push({ name: 'Debt Ratio', score: 15, status: 'good' });
+                    } else {
+                        const debtScore = Math.max(0, 20 - debtRatio * 20);
+                        score += debtScore;
+                        factors.push({ name: 'Debt Ratio', score: debtScore, status: 'needs improvement' });
+                    }
+                    
+                    // Savings rate (20 points)
+                    const monthlyIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0) / 12 || annualIncome / 12;
+                    const savingsRate = monthlyIncome > 0 ? (monthlyIncome - monthlyExpenses) / monthlyIncome : 0;
+                    if (savingsRate >= 0.2) {
+                        score += 20;
+                        factors.push({ name: 'Savings Rate', score: 20, status: 'excellent' });
+                    } else if (savingsRate >= 0.1) {
+                        score += 15;
+                        factors.push({ name: 'Savings Rate', score: 15, status: 'good' });
+                    } else {
+                        const savingsScore = Math.max(0, savingsRate * 100);
+                        score += savingsScore;
+                        factors.push({ name: 'Savings Rate', score: savingsScore, status: 'needs improvement' });
+                    }
+                    
+                    // Investment diversification (20 points)
+                    const portfolioBalance = investmentPortfolio.every(a => {
+                        const totalValue = Math.max(1, investmentPortfolio.reduce((sum, asset) => sum + asset.value, 0));
+                        const actual = (a.value / totalValue) * 100;
+                        return Math.abs(actual - a.target) < 10;
+                    });
+                    if (portfolioBalance) {
+                        score += 20;
+                        factors.push({ name: 'Portfolio Balance', score: 20, status: 'excellent' });
+                    } else {
+                        score += 10;
+                        factors.push({ name: 'Portfolio Balance', score: 10, status: 'needs rebalancing' });
+                    }
+                    
+                    // Credit utilization (20 points)
+                    const creditCards = debts.filter(d => d.name.includes('Credit'));
+                    const totalCreditLimit = 20000; // Assumed
+                    const creditUtilization = totalCreditLimit > 0 ? creditCards.reduce((sum, c) => sum + c.balance, 0) / totalCreditLimit : 0;
+                    if (creditUtilization < 0.1) {
+                        score += 20;
+                        factors.push({ name: 'Credit Utilization', score: 20, status: 'excellent' });
+                    } else if (creditUtilization < 0.3) {
+                        score += 15;
+                        factors.push({ name: 'Credit Utilization', score: 15, status: 'good' });
+                    } else {
+                        const creditScore = Math.max(0, 20 - creditUtilization * 40);
+                        score += creditScore;
+                        factors.push({ name: 'Credit Utilization', score: creditScore, status: 'needs improvement' });
+                    }
+                } catch (error) {
+                    console.error('Error calculating financial health:', error);
+                    // Return default values if calculation fails
+                    return { score: 0, factors: [], grade: 'N/A' };
+                }
+                
+                return { 
+                    score: Math.round(Math.min(100, Math.max(0, score))), 
+                    factors, 
+                    grade: score >= 90 ? 'A' : score >= 80 ? 'B' : score >= 70 ? 'C' : score >= 60 ? 'D' : 'F' 
+                };
+            };
+            
+            // Prepare chart data
+            const prepareChartData = () => {
+                const monthlySpending = {
+                    labels: budgetEnvelopes.map(e => e.category),
+                    datasets: [{
+                        label: 'Budget',
+                        data: budgetEnvelopes.map(e => e.budget),
+                        backgroundColor: 'rgba(0, 255, 255, 0.3)',
+                        borderColor: 'rgba(0, 255, 255, 1)',
+                        borderWidth: 2
+                    }, {
+                        label: 'Spent',
+                        data: budgetEnvelopes.map(e => e.spent),
+                        backgroundColor: 'rgba(255, 0, 128, 0.3)',
+                        borderColor: 'rgba(255, 0, 128, 1)',
+                        borderWidth: 2
+                    }]
+                };
+                
+                const portfolioPie = {
+                    labels: investmentPortfolio.map(a => a.asset),
+                    datasets: [{
+                        data: investmentPortfolio.map(a => a.value),
+                        backgroundColor: [
+                            'rgba(0, 255, 255, 0.8)',
+                            'rgba(120, 255, 214, 0.8)',
+                            'rgba(255, 0, 128, 0.8)',
+                            'rgba(255, 215, 0, 0.8)',
+                            'rgba(0, 128, 255, 0.8)'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#0a0a0a'
+                    }]
+                };
+                
+                const debtProgress = {
+                    labels: debts.map(d => d.name),
+                    datasets: [{
+                        label: 'Balance',
+                        data: debts.map(d => d.balance),
+                        backgroundColor: 'rgba(255, 0, 128, 0.8)',
+                        borderColor: 'rgba(255, 0, 128, 1)',
+                        borderWidth: 2
+                    }]
+                };
+                
+                return { monthlySpending, portfolioPie, debtProgress };
+            };
+            
+            const chartData = prepareChartData();
+            const anomalies = detectAnomalies();
+            const monteCarloResults = runMonteCarloSimulation();
+            const taxEstimate = estimateTaxes();
+            const rebalancingSuggestions = calculateRebalancing();
+            const debtStrategies = calculateDebtStrategies();
+            const financialHealth = calculateFinancialHealth();
+            
+            const tabs = [
+                { id: 'dashboard', label: 'Dashboard', icon: 'layout-dashboard' },
+                { id: 'accounts', label: 'Accounts', icon: 'wallet' },
+                { id: 'transactions', label: 'Transactions', icon: 'receipt' },
+                { id: 'budget', label: 'Budget', icon: 'calculator' },
+                { id: 'investments', label: 'Investments', icon: 'trending-up' },
+                { id: 'debt', label: 'Debt', icon: 'credit-card' },
+                { id: 'goals', label: 'Goals', icon: 'target' },
+                { id: 'retirement', label: 'Retirement', icon: 'umbrella' },
+                { id: 'taxes', label: 'Taxes', icon: 'file-text' },
+                { id: 'crypto', label: 'Crypto', icon: 'bitcoin' }
+            ];
+            
+            useEffect(() => {
+                lucide.createIcons();
+            });
+            
+            return (
+                <div className={`min-h-screen p-4 transition-all duration-500`}>
+                    <div className="grid-overlay"></div>
+                    {/* Notifications */}
+                    <div className="fixed top-4 right-4 z-50 space-y-2">
+                        {notifications.map(notif => (
+                            <div key={notif.id} className={`animate-slide-in px-4 py-3 rounded-lg text-white font-medium shadow-lg ${
+                                notif.type === 'success' ? 'bg-gradient-to-r from-green-500/80 to-emerald-500/80' :
+                                notif.type === 'error' ? 'bg-gradient-to-r from-red-500/80 to-pink-500/80' :
+                                notif.type === 'warning' ? 'bg-gradient-to-r from-yellow-500/80 to-orange-500/80' : 
+                                'bg-gradient-to-r from-blue-500/80 to-cyan-500/80'
+                            }`}>
+                                {notif.message}
+                            </div>
+                        ))}
+                    </div>
+                    
+                    {/* Loading Overlay */}
+                    {loading && (
+                        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50">
+                            <div className="text-center">
+                                <div className="spinner mx-auto mb-4"></div>
+                                <p className="text-cyan-400 animate-pulse">Processing your data...</p>
+                            </div>
+                        </div>
+                    )}
+                    
+                    <div className="max-w-7xl mx-auto">
+                        {/* Header */}
+                        <div className="glass rounded-2xl p-6 mb-6 animate-slide-in">
+                            <div className="flex justify-between items-center flex-wrap gap-4">
+                                <div>
+                                    <h1 className="text-3xl font-bold mb-2 neon-cyan">Personal Finance Command Center</h1>
+                                    <p className="text-gray-400">Advanced Financial Management & Analytics</p>
+                                </div>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setDarkMode(!darkMode)}
+                                        className="px-4 py-2 btn-outline rounded-lg flex items-center"
+                                    >
+                                        <Icon name={darkMode ? 'sun' : 'moon'} className="w-4 h-4" />
+                                    </button>
+                                    <label className="px-4 py-2 btn-primary rounded-lg cursor-pointer flex items-center gap-2">
+                                        <Icon name="upload" className="w-4 h-4" />
+                                        Import CSV
+                                        <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" />
+                                    </label>
+                                    <button
+                                        onClick={exportToExcel}
+                                        className="px-4 py-2 btn-secondary rounded-lg flex items-center gap-2"
+                                    >
+                                        <Icon name="download" className="w-4 h-4" />
+                                        Export Report
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Financial Health Score */}
+                        <div className="glass rounded-2xl p-6 mb-6 animate-slide-in">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-gray-400 font-semibold mb-2">Financial Health Score</h3>
+                                    <div className="flex items-center gap-4">
+                                        <div className="text-5xl font-bold neon-green">{financialHealth.score}</div>
+                                        <div className={`text-3xl font-bold px-4 py-2 rounded-lg ${
+                                            financialHealth.grade === 'A' ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-400 border border-green-500/50' :
+                                            financialHealth.grade === 'B' ? 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-400 border border-blue-500/50' :
+                                            financialHealth.grade === 'C' ? 'bg-gradient-to-r from-yellow-500/20 to-amber-500/20 text-yellow-400 border border-yellow-500/50' :
+                                            'bg-gradient-to-r from-red-500/20 to-pink-500/20 text-red-400 border border-red-500/50'
+                                        }`}>
+                                            Grade: {financialHealth.grade}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    {financialHealth.factors.slice(0, 3).map(factor => (
+                                        <div key={factor.name} className="flex items-center gap-2">
+                                            <span className="text-gray-400 text-sm w-32">{factor.name}:</span>
+                                            <div className="w-32 bg-black/50 rounded-full h-2 border border-cyan-500/20">
+                                                <div 
+                                                    className={`h-2 rounded-full ${
+                                                        factor.status === 'excellent' ? 'bg-gradient-to-r from-green-400 to-emerald-400' :
+                                                        factor.status === 'good' ? 'bg-gradient-to-r from-blue-400 to-cyan-400' :
+                                                        'bg-gradient-to-r from-yellow-400 to-orange-400'
+                                                    }`}
+                                                    style={{ width: `${factor.score * 5}%`, boxShadow: '0 0 10px currentColor' }}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Tab Navigation */}
+                        <div className="glass rounded-2xl p-2 mb-6 animate-slide-in">
+                            <div className="flex gap-2 overflow-x-auto">
+                                {tabs.map(tab => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setActiveTab(tab.id)}
+                                        className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 whitespace-nowrap ${
+                                            activeTab === tab.id
+                                                ? 'tab-active text-cyan-400'
+                                                : 'text-gray-400 hover:bg-white/5 hover:text-cyan-300'
+                                        }`}
+                                    >
+                                        <Icon name={tab.icon} className="w-4 h-4" />
+                                        {tab.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        {/* Content Area */}
+                        <div className="glass rounded-2xl p-6 min-h-[600px] animate-slide-in">
+                            {/* Dashboard Tab */}
+                            {activeTab === 'dashboard' && (
+                                <div className="space-y-6">
+                                    {/* Key Metrics */}
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <div className="glass-dark rounded-xl p-4 card-hover">
+                                            <h3 className="text-gray-500 text-sm mb-1">Net Worth</h3>
+                                            <p className="text-2xl font-bold text-cyan-400">
+                                                ${(accounts.reduce((sum, a) => sum + a.balance, 0) - debts.reduce((sum, d) => sum + d.balance, 0)).toLocaleString()}
+                                            </p>
+                                            <p className="text-green-400 text-sm mt-1">↑ 5.2% this month</p>
+                                        </div>
+                                        <div className="glass-dark rounded-xl p-4 card-hover">
+                                            <h3 className="text-gray-500 text-sm mb-1">Total Assets</h3>
+                                            <p className="text-2xl font-bold neon-green">
+                                                ${accounts.reduce((sum, a) => sum + a.balance, 0).toLocaleString()}
+                                            </p>
+                                            <p className="text-gray-400 text-sm mt-1">3 accounts</p>
+                                        </div>
+                                        <div className="glass-dark rounded-xl p-4 card-hover">
+                                            <h3 className="text-gray-500 text-sm mb-1">Total Debt</h3>
+                                            <p className="text-2xl font-bold text-pink-500">
+                                                ${debts.reduce((sum, d) => sum + d.balance, 0).toLocaleString()}
+                                            </p>
+                                            <p className="text-gray-400 text-sm mt-1">5 accounts</p>
+                                        </div>
+                                        <div className="glass-dark rounded-xl p-4 card-hover">
+                                            <h3 className="text-gray-500 text-sm mb-1">Savings Rate</h3>
+                                            <p className="text-2xl font-bold text-purple-400">
+                                                {((1 - budgetEnvelopes.reduce((sum, e) => sum + e.spent, 0) / 
+                                                   (budgetEnvelopes.reduce((sum, e) => sum + e.budget, 0) || 1)) * 100).toFixed(1)}%
+                                            </p>
+                                            <p className="text-gray-400 text-sm mt-1">of income</p>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Charts */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="glass-dark rounded-xl p-4">
+                                            <h3 className="text-cyan-400 font-semibold mb-4">Budget vs Spending</h3>
+                                            <ChartComponent
+                                                type="bar"
+                                                data={chartData.monthlySpending}
+                                                options={{
+                                                    plugins: {
+                                                        legend: { labels: { color: '#00ffff' } }
+                                                    },
+                                                    scales: {
+                                                        x: { ticks: { color: '#78ffd6' }, grid: { color: 'rgba(0,255,255,0.1)' } },
+                                                        y: { ticks: { color: '#78ffd6' }, grid: { color: 'rgba(0,255,255,0.1)' } }
+                                                    }
+                                                }}
+                                                id="budget-chart"
+                                            />
+                                        </div>
+                                        
+                                        <div className="glass-dark rounded-xl p-4">
+                                            <h3 className="text-cyan-400 font-semibold mb-4">Portfolio Allocation</h3>
+                                            <ChartComponent
+                                                type="doughnut"
+                                                data={chartData.portfolioPie}
+                                                options={{
+                                                    plugins: {
+                                                        legend: { 
+                                                            labels: { color: '#00ffff' },
+                                                            position: 'bottom'
+                                                        }
+                                                    }
+                                                }}
+                                                id="portfolio-chart"
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Alerts */}
+                                    {anomalies.length > 0 && (
+                                        <div className="alert-warning rounded-xl p-4">
+                                            <div className="flex items-center gap-2 mb-3">
+                                                <Icon name="alert-triangle" className="w-5 h-5 text-yellow-400" />
+                                                <h3 className="text-yellow-400 font-semibold">Unusual Transactions Detected</h3>
+                                            </div>
+                                            <div className="space-y-2">
+                                                {anomalies.slice(0, 3).map(t => (
+                                                    <div key={t.id} className="text-gray-300 text-sm flex justify-between">
+                                                        <span>{t.date}: {t.description}</span>
+                                                        <span className="font-medium text-yellow-400">${t.amount.toFixed(2)}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                    
+                                    {/* Quick Actions */}
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <button className="glass-dark rounded-xl p-4 text-cyan-400 hover:bg-cyan-500/10 hover:border-cyan-500/50 transition-all border border-transparent">
+                                            <Icon name="plus-circle" className="w-8 h-8 mb-2 mx-auto" />
+                                            <p className="text-sm">Add Transaction</p>
+                                        </button>
+                                        <button className="glass-dark rounded-xl p-4 text-pink-400 hover:bg-pink-500/10 hover:border-pink-500/50 transition-all border border-transparent">
+                                            <Icon name="target" className="w-8 h-8 mb-2 mx-auto" />
+                                            <p className="text-sm">New Goal</p>
+                                        </button>
+                                        <button className="glass-dark rounded-xl p-4 text-green-400 hover:bg-green-500/10 hover:border-green-500/50 transition-all border border-transparent">
+                                            <Icon name="pie-chart" className="w-8 h-8 mb-2 mx-auto" />
+                                            <p className="text-sm">Rebalance</p>
+                                        </button>
+                                        <button className="glass-dark rounded-xl p-4 text-purple-400 hover:bg-purple-500/10 hover:border-purple-500/50 transition-all border border-transparent">
+                                            <Icon name="calendar" className="w-8 h-8 mb-2 mx-auto" />
+                                            <p className="text-sm">Schedule</p>
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* Accounts Tab */}
+                            {activeTab === 'accounts' && (
+                                <div className="space-y-6">
+                                    <h3 className="text-white font-semibold text-lg">Account Overview</h3>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        {accounts.map(account => (
+                                            <div key={account.name} className="glass-dark rounded-xl p-6 card-hover">
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <Icon name={
+                                                        account.type === 'checking' ? 'wallet' :
+                                                        account.type === 'savings' ? 'piggy-bank' : 'trending-up'
+                                                    } className="w-8 h-8 text-white/70" />
+                                                    <span className="text-white/50 text-sm">{account.number}</span>
+                                                </div>
+                                                <h4 className="text-white font-medium mb-2">{account.name}</h4>
+                                                <p className="text-3xl font-bold text-white mb-2">
+                                                    ${account.balance.toLocaleString()}
+                                                </p>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-green-400 text-sm">↑ 2.3%</span>
+                                                    <span className="text-white/50 text-sm">this month</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    
+                                    <div className="glass-dark rounded-xl p-6">
+                                        <h4 className="text-white font-medium mb-4">Recent Account Activity</h4>
+                                        <div className="space-y-3">
+                                            {transactions.slice(0, 5).map(t => (
+                                                <div key={t.id} className="flex justify-between items-center py-2 border-b border-white/10">
+                                                    <div>
+                                                        <p className="text-white">{t.description}</p>
+                                                        <p className="text-white/50 text-sm">{t.date} • {t.account}</p>
+                                                    </div>
+                                                    <span className={`font-medium ${t.type === 'expense' ? 'text-red-400' : 'text-green-400'}`}>
+                                                        {t.type === 'expense' ? '-' : '+'}${t.amount.toFixed(2)}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* Transactions Tab */}
+                            {activeTab === 'transactions' && (
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center">
+                                        <h3 className="text-cyan-400 font-semibold text-lg">Transaction History</h3>
+                                        <div className="flex gap-2">
+                                            <button className="px-3 py-1 btn-outline rounded-lg text-sm">
+                                                Filter
+                                            </button>
+                                            <button className="px-3 py-1 btn-outline rounded-lg text-sm">
+                                                Sort
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    {transactions.length === 0 ? (
+                                        <div className="text-center py-12">
+                                            <Icon name="upload" className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                                            <p className="text-gray-400">Upload a CSV file to analyze transactions</p>
+                                        </div>
+                                    ) : (
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full">
+                                                <thead>
+                                                    <tr className="border-b border-cyan-500/20">
+                                                        <th className="text-left p-2 text-cyan-400">Date</th>
+                                                        <th className="text-left p-2 text-cyan-400">Description</th>
+                                                        <th className="text-left p-2 text-cyan-400">Category</th>
+                                                        <th className="text-left p-2 text-cyan-400">Confidence</th>
+                                                        <th className="text-right p-2 text-cyan-400">Amount</th>
+                                                        <th className="text-center p-2 text-cyan-400">Tags</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {transactions.slice(0, 15).map(t => (
+                                                        <tr key={t.id} className="border-b border-gray-800 hover:bg-cyan-500/5">
+                                                            <td className="p-2 text-gray-400">{t.date}</td>
+                                                            <td className="p-2 text-gray-300">
+                                                                {t.description}
+                                                                {t.recurring && (
+                                                                    <span className="ml-2 px-2 py-0.5 bg-blue-500/30 text-blue-400 text-xs rounded">
+                                                                        Recurring
+                                                                    </span>
+                                                                )}
+                                                            </td>
+                                                            <td className="p-2">
+                                                                <span className="px-2 py-1 bg-cyan-500/20 text-cyan-300 rounded text-xs border border-cyan-500/30">
+                                                                    {t.category}
+                                                                </span>
+                                                            </td>
+                                                            <td className="p-2">
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="w-16 bg-black/50 rounded-full h-2 border border-cyan-500/20">
+                                                                        <div 
+                                                                            className={`h-2 rounded-full ${
+                                                                                t.confidence > 80 ? 'bg-green-400' :
+                                                                                t.confidence > 60 ? 'bg-yellow-400' : 'bg-red-400'
+                                                                            }`}
+                                                                            style={{ width: `${t.confidence}%` }}
+                                                                        />
+                                                                    </div>
+                                                                    <span className="text-xs text-gray-500">{t.confidence.toFixed(0)}%</span>
+                                                                </div>
+                                                            </td>
+                                                            <td className={`p-2 text-right font-medium ${
+                                                                t.type === 'expense' ? 'text-pink-400' : 'text-green-400'
+                                                            }`}>
+                                                                {t.type === 'expense' ? '-' : '+'}${t.amount.toFixed(2)}
+                                                            </td>
+                                                            <td className="p-2 text-center">
+                                                                <button className="text-gray-500 hover:text-cyan-400">
+                                                                    <Icon name="tag" className="w-4 h-4" />
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                            
+                            {/* Budget Tab */}
+                            {activeTab === 'budget' && (
+                                <div className="space-y-6">
+                                    <div className="flex justify-between items-center">
+                                        <h3 className="text-white font-semibold text-lg">Budget Management</h3>
+                                        <button className="px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30">
+                                            Edit Budgets
+                                        </button>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {budgetEnvelopes.map(envelope => {
+                                            const percentage = envelope.budget > 0 ? (envelope.spent / envelope.budget) * 100 : 0;
+                                            const isOverBudget = percentage > 100;
+                                            const remaining = envelope.budget - envelope.spent;
+                                            
+                                            return (
+                                                <div key={envelope.category} className="glass-dark rounded-xl p-4 card-hover">
+                                                    <div className="flex items-center justify-between mb-3">
+                                                        <div className="flex items-center gap-2">
+                                                            <Icon name={envelope.icon} className="w-5 h-5 text-white/70" />
+                                                            <span className="text-white font-medium">{envelope.category}</span>
+                                                        </div>
+                                                        <span className={`text-sm font-medium ${isOverBudget ? 'text-red-400' : 'text-green-400'}`}>
+                                                            ${remaining > 0 ? remaining.toFixed(0) : 0} left
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex justify-between text-sm text-white/70 mb-2">
+                                                        <span>${envelope.spent.toFixed(0)} spent</span>
+                                                        <span>${envelope.budget} budget</span>
+                                                    </div>
+                                                    <div className="progress-bar">
+                                                        <div
+                                                            className={`progress-fill ${isOverBudget ? 'bg-gradient-to-r from-red-500 to-red-600' : ''}`}
+                                                            style={{ width: `${Math.min(percentage, 100)}%` }}
+                                                        />
+                                                    </div>
+                                                    <p className="text-white/60 text-xs mt-2">
+                                                        {percentage.toFixed(1)}% used
+                                                    </p>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                    
+                                    <div className="glass-dark rounded-xl p-6">
+                                        <h4 className="text-white font-medium mb-4">Budget Summary</h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div>
+                                                <p className="text-white/70 text-sm">Total Budget</p>
+                                                <p className="text-2xl font-bold text-white">
+                                                    ${budgetEnvelopes.reduce((sum, e) => sum + e.budget, 0).toLocaleString()}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-white/70 text-sm">Total Spent</p>
+                                                <p className="text-2xl font-bold text-yellow-400">
+                                                    ${budgetEnvelopes.reduce((sum, e) => sum + e.spent, 0).toLocaleString()}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-white/70 text-sm">Remaining</p>
+                                                <p className="text-2xl font-bold text-green-400">
+                                                    ${(budgetEnvelopes.reduce((sum, e) => sum + e.budget, 0) - 
+                                                      budgetEnvelopes.reduce((sum, e) => sum + e.spent, 0)).toLocaleString()}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* Investments Tab */}
+                            {activeTab === 'investments' && (
+                                <div className="space-y-6">
+                                    <h3 className="text-white font-semibold text-lg">Investment Portfolio</h3>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="glass-dark rounded-xl p-6">
+                                            <h4 className="text-white font-medium mb-4">Portfolio Performance</h4>
+                                            <div className="space-y-3">
+                                                {investmentPortfolio.map(asset => (
+                                                    <div key={asset.asset} className="flex justify-between items-center">
+                                                        <div>
+                                                            <p className="text-white">{asset.asset}</p>
+                                                            <p className="text-white/60 text-sm">${asset.value.toLocaleString()}</p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className={`font-medium ${asset.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                                                {asset.change >= 0 ? '+' : ''}{asset.change}%
+                                                            </p>
+                                                            <p className="text-white/60 text-sm">Today</p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="glass-dark rounded-xl p-6">
+                                            <h4 className="text-white font-medium mb-4">Rebalancing Suggestions</h4>
+                                            <div className="space-y-3">
+                                                {rebalancingSuggestions.map(asset => (
+                                                    <div key={asset.asset} className="flex justify-between items-center">
+                                                        <span className="text-white/80">{asset.asset}</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className={`text-sm font-medium ${
+                                                                asset.action === 'Buy' ? 'text-green-400' : 'text-red-400'
+                                                            }`}>
+                                                                {asset.action} ${asset.amount.toFixed(0)}
+                                                            </span>
+                                                            <span className="text-white/60 text-xs">
+                                                                ({asset.actual.toFixed(1)}% → {asset.target}%)
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="mt-4 pt-4 border-t border-white/20">
+                                                <p className="text-white/60 text-sm">
+                                                    Estimated tax impact: ${rebalancingSuggestions.reduce((sum, a) => sum + a.taxCost, 0).toFixed(0)}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="glass-dark rounded-xl p-6">
+                                        <h4 className="text-white font-medium mb-4">Portfolio Analytics</h4>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                            <div>
+                                                <p className="text-white/70 text-sm">Total Value</p>
+                                                <p className="text-xl font-bold text-white">
+                                                    ${investmentPortfolio.reduce((sum, a) => sum + a.value, 0).toLocaleString()}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-white/70 text-sm">Day Change</p>
+                                                <p className="text-xl font-bold text-green-400">+$2,450</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-white/70 text-sm">YTD Return</p>
+                                                <p className="text-xl font-bold text-green-400">+12.5%</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-white/70 text-sm">Risk Level</p>
+                                                <p className="text-xl font-bold text-yellow-400">Moderate</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* Debt Tab */}
+                            {activeTab === 'debt' && (
+                                <div className="space-y-6">
+                                    <h3 className="text-white font-semibold text-lg">Debt Management</h3>
+                                    
+                                    <div className="glass-dark rounded-xl p-6">
+                                        <h4 className="text-white font-medium mb-4">Debt Overview</h4>
+                                        <ChartComponent
+                                            type="bar"
+                                            data={chartData.debtProgress}
+                                            options={{
+                                                indexAxis: 'y',
+                                                plugins: {
+                                                    legend: { display: false }
+                                                },
+                                                scales: {
+                                                    x: { ticks: { color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                                                    y: { ticks: { color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+                                                }
+                                            }}
+                                            id="debt-chart"
+                                        />
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        {Object.entries(debtStrategies).map(([strategy, data]) => (
+                                            <div key={strategy} className="glass-dark rounded-xl p-4">
+                                                <h4 className="text-white font-medium mb-3 capitalize">{strategy} Method</h4>
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between">
+                                                        <span className="text-white/70 text-sm">Time to payoff</span>
+                                                        <span className="text-white font-medium">{data.months} months</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-white/70 text-sm">Total interest</span>
+                                                        <span className="text-red-400 font-medium">${data.totalInterest.toFixed(0)}</span>
+                                                    </div>
+                                                    <div className="pt-2 border-t border-white/20">
+                                                        <p className="text-white/60 text-xs">Payoff order:</p>
+                                                        {data.payoffOrder.slice(0, 3).map((item, idx) => (
+                                                            <p key={idx} className="text-white/80 text-xs">
+                                                                {idx + 1}. {item.name} (month {item.month})
+                                                            </p>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    
+                                    <div className="glass-dark rounded-xl p-6">
+                                        <h4 className="text-white font-medium mb-4">Debt Details</h4>
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-white">
+                                                <thead>
+                                                    <tr className="border-b border-white/20">
+                                                        <th className="text-left p-2">Debt</th>
+                                                        <th className="text-right p-2">Balance</th>
+                                                        <th className="text-right p-2">APR</th>
+                                                        <th className="text-right p-2">Min Payment</th>
+                                                        <th className="text-right p-2">Current Payment</th>
+                                                        <th className="text-right p-2">Monthly Interest</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {debts.map(debt => (
+                                                        <tr key={debt.name} className="border-b border-white/10">
+                                                            <td className="p-2">{debt.name}</td>
+                                                            <td className="p-2 text-right">${debt.balance.toLocaleString()}</td>
+                                                            <td className="p-2 text-right">{debt.rate}%</td>
+                                                            <td className="p-2 text-right">${debt.minimum}</td>
+                                                            <td className="p-2 text-right text-green-400">${debt.paid}</td>
+                                                            <td className="p-2 text-right text-red-400">
+                                                                ${((debt.balance * debt.rate / 100) / 12).toFixed(2)}
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* Goals Tab */}
+                            {activeTab === 'goals' && (
+                                <div className="space-y-6">
+                                    <div className="flex justify-between items-center">
+                                        <h3 className="text-white font-semibold text-lg">Financial Goals</h3>
+                                        <button className="px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30">
+                                            Add Goal
+                                        </button>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {goals.map(goal => {
+                                            const progress = (goal.current / goal.target) * 100;
+                                            const daysLeft = Math.ceil((new Date(goal.deadline) - new Date()) / (1000 * 60 * 60 * 24));
+                                            const monthlyRequired = (goal.target - goal.current) / Math.max(1, daysLeft / 30);
+                                            
+                                            return (
+                                                <div key={goal.name} className="glass-dark rounded-xl p-6 card-hover">
+                                                    <div className="flex justify-between items-start mb-4">
+                                                        <div>
+                                                            <h4 className="text-white font-medium text-lg">{goal.name}</h4>
+                                                            <p className="text-white/60 text-sm">Due: {goal.deadline}</p>
+                                                        </div>
+                                                        <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                                            goal.priority === 'high' ? 'bg-red-500/30 text-red-400' :
+                                                            goal.priority === 'medium' ? 'bg-yellow-500/30 text-yellow-400' :
+                                                            'bg-blue-500/30 text-blue-400'
+                                                        }`}>
+                                                            {goal.priority} priority
+                                                        </span>
+                                                    </div>
+                                                    
+                                                    <div className="mb-4">
+                                                        <div className="flex justify-between text-sm mb-2">
+                                                            <span className="text-white/70">${goal.current.toLocaleString()}</span>
+                                                            <span className="text-white font-medium">${goal.target.toLocaleString()}</span>
+                                                        </div>
+                                                        <div className="progress-bar">
+                                                            <div 
+                                                                className="progress-fill"
+                                                                style={{ width: `${progress}%` }}
+                                                            />
+                                                        </div>
+                                                        <p className="text-white/60 text-xs mt-2">{progress.toFixed(1)}% complete</p>
+                                                    </div>
+                                                    
+                                                    <div className="grid grid-cols-2 gap-2 text-sm">
+                                                        <div>
+                                                            <p className="text-white/60">Days left</p>
+                                                            <p className="text-white font-medium">{daysLeft}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-white/60">Monthly needed</p>
+                                                            <p className="text-white font-medium">${monthlyRequired.toFixed(0)}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* Retirement Tab */}
+                            {activeTab === 'retirement' && (
+                                <div className="space-y-6">
+                                    <h3 className="text-white font-semibold text-lg">Retirement Planning</h3>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="glass-dark rounded-xl p-6">
+                                            <h4 className="text-white font-medium mb-4">Retirement Parameters</h4>
+                                            <div className="space-y-3">
+                                                <div>
+                                                    <label className="text-white/70 text-sm">Current Age</label>
+                                                    <input
+                                                        type="number"
+                                                        value={retirementParams.currentAge}
+                                                        onChange={(e) => setRetirementParams({...retirementParams, currentAge: +e.target.value})}
+                                                        className="w-full bg-white/10 border border-white/20 rounded px-3 py-1 text-white"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-white/70 text-sm">Retirement Age</label>
+                                                    <input
+                                                        type="number"
+                                                        value={retirementParams.retirementAge}
+                                                        onChange={(e) => setRetirementParams({...retirementParams, retirementAge: +e.target.value})}
+                                                        className="w-full bg-white/10 border border-white/20 rounded px-3 py-1 text-white"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-white/70 text-sm">Current Savings</label>
+                                                    <input
+                                                        type="number"
+                                                        value={retirementParams.currentSavings}
+                                                        onChange={(e) => setRetirementParams({...retirementParams, currentSavings: +e.target.value})}
+                                                        className="w-full bg-white/10 border border-white/20 rounded px-3 py-1 text-white"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-white/70 text-sm">Monthly Contribution</label>
+                                                    <input
+                                                        type="number"
+                                                        value={retirementParams.monthlyContribution}
+                                                        onChange={(e) => setRetirementParams({...retirementParams, monthlyContribution: +e.target.value})}
+                                                        className="w-full bg-white/10 border border-white/20 rounded px-3 py-1 text-white"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-white/70 text-sm">Annual Retirement Spending</label>
+                                                    <input
+                                                        type="number"
+                                                        value={retirementParams.retirementSpending}
+                                                        onChange={(e) => setRetirementParams({...retirementParams, retirementSpending: +e.target.value})}
+                                                        className="w-full bg-white/10 border border-white/20 rounded px-3 py-1 text-white"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="glass-dark rounded-xl p-6">
+                                            <h4 className="text-white font-medium mb-4">Monte Carlo Simulation (5,000 runs)</h4>
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between">
+                                                    <span className="text-white/70">Success Rate</span>
+                                                    <span className={`font-bold text-lg ${
+                                                        monteCarloResults.successRate >= 80 ? 'text-green-400' :
+                                                        monteCarloResults.successRate >= 60 ? 'text-yellow-400' : 'text-red-400'
+                                                    }`}>
+                                                        {monteCarloResults.successRate.toFixed(1)}%
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-white/70">95th Percentile</span>
+                                                    <span className="text-green-400 font-medium">
+                                                        ${(monteCarloResults.percentile95 / 1000000).toFixed(2)}M
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-white/70">75th Percentile</span>
+                                                    <span className="text-blue-400 font-medium">
+                                                        ${(monteCarloResults.percentile75 / 1000000).toFixed(2)}M
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-white/70">Median</span>
+                                                    <span className="text-yellow-400 font-medium">
+                                                        ${(monteCarloResults.median / 1000000).toFixed(2)}M
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-white/70">25th Percentile</span>
+                                                    <span className="text-orange-400 font-medium">
+                                                        ${(monteCarloResults.percentile25 / 1000000).toFixed(2)}M
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="mt-4 p-3 bg-blue-500/20 rounded-lg">
+                                                <p className="text-white/80 text-sm">
+                                                    You have a {monteCarloResults.successRate.toFixed(0)}% chance of not running out of money in retirement
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="glass-dark rounded-xl p-6">
+                                        <h4 className="text-white font-medium mb-4">Retirement Readiness</h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div>
+                                                <p className="text-white/70 text-sm">Years to Retirement</p>
+                                                <p className="text-2xl font-bold text-white">
+                                                    {retirementParams.retirementAge - retirementParams.currentAge}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-white/70 text-sm">Projected Retirement Balance</p>
+                                                <p className="text-2xl font-bold text-green-400">
+                                                    ${(monteCarloResults.median / 1000000).toFixed(2)}M
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-white/70 text-sm">Safe Withdrawal Rate</p>
+                                                <p className="text-2xl font-bold text-blue-400">4%</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* Taxes Tab */}
+                            {activeTab === 'taxes' && (
+                                <div className="space-y-6">
+                                    <h3 className="text-white font-semibold text-lg">Tax Planning</h3>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="glass-dark rounded-xl p-6">
+                                            <h4 className="text-white font-medium mb-4">Tax Parameters</h4>
+                                            <div className="space-y-3">
+                                                <div>
+                                                    <label className="text-white/70 text-sm">Annual Income</label>
+                                                    <input
+                                                        type="number"
+                                                        value={taxParams.income}
+                                                        onChange={(e) => setTaxParams({...taxParams, income: +e.target.value})}
+                                                        className="w-full bg-white/10 border border-white/20 rounded px-3 py-1 text-white"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-white/70 text-sm">Filing Status</label>
+                                                    <select
+                                                        value={taxParams.filingStatus}
+                                                        onChange={(e) => setTaxParams({...taxParams, filingStatus: e.target.value})}
+                                                        className="w-full bg-white/10 border border-white/20 rounded px-3 py-1 text-white"
+                                                    >
+                                                        <option value="single">Single</option>
+                                                        <option value="married">Married Filing Jointly</option>
+                                                        <option value="head">Head of Household</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className="text-white/70 text-sm">State Tax Rate (%)</label>
+                                                    <input
+                                                        type="number"
+                                                        step="0.1"
+                                                        value={taxParams.stateTax}
+                                                        onChange={(e) => setTaxParams({...taxParams, stateTax: +e.target.value})}
+                                                        className="w-full bg-white/10 border border-white/20 rounded px-3 py-1 text-white"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-white/70 text-sm">Dependents</label>
+                                                    <input
+                                                        type="number"
+                                                        value={taxParams.dependents}
+                                                        onChange={(e) => setTaxParams({...taxParams, dependents: +e.target.value})}
+                                                        className="w-full bg-white/10 border border-white/20 rounded px-3 py-1 text-white"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="glass-dark rounded-xl p-6">
+                                            <h4 className="text-white font-medium mb-4">Tax Calculation Results</h4>
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between">
+                                                    <span className="text-white/70">Gross Income</span>
+                                                    <span className="text-white font-medium">${taxParams.income.toLocaleString()}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-white/70">Deductions</span>
+                                                    <span className="text-white font-medium">${taxEstimate.deductions.toLocaleString()}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-white/70">Taxable Income</span>
+                                                    <span className="text-white font-medium">${taxEstimate.taxableIncome.toLocaleString()}</span>
+                                                </div>
+                                                <div className="border-t border-white/20 pt-3">
+                                                    <div className="flex justify-between mb-2">
+                                                        <span className="text-white/70">Federal Tax</span>
+                                                        <span className="text-red-400 font-medium">${taxEstimate.federalTax.toFixed(0)}</span>
+                                                    </div>
+                                                    <div className="flex justify-between mb-2">
+                                                        <span className="text-white/70">State Tax</span>
+                                                        <span className="text-red-400 font-medium">${taxEstimate.stateTax.toFixed(0)}</span>
+                                                    </div>
+                                                    <div className="flex justify-between mb-2">
+                                                        <span className="text-white/70">FICA</span>
+                                                        <span className="text-red-400 font-medium">
+                                                            ${(taxEstimate.socialSecurity + taxEstimate.medicare).toFixed(0)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div className="border-t border-white/20 pt-3">
+                                                    <div className="flex justify-between mb-2">
+                                                        <span className="text-white/70">Total Tax</span>
+                                                        <span className="text-red-500 font-bold text-lg">${taxEstimate.totalTax.toFixed(0)}</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-white/70">After-Tax Income</span>
+                                                        <span className="text-green-400 font-bold text-lg">${taxEstimate.afterTaxIncome.toLocaleString()}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="glass-dark rounded-xl p-6">
+                                        <h4 className="text-white font-medium mb-4">Tax Rates</h4>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                            <div>
+                                                <p className="text-white/70 text-sm">Effective Rate</p>
+                                                <p className="text-2xl font-bold text-yellow-400">{taxEstimate.effectiveRate.toFixed(1)}%</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-white/70 text-sm">Marginal Rate</p>
+                                                <p className="text-2xl font-bold text-orange-400">{taxEstimate.marginalRate}%</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-white/70 text-sm">Tax Credits</p>
+                                                <p className="text-2xl font-bold text-green-400">${taxEstimate.credits.toLocaleString()}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-white/70 text-sm">Monthly Take-Home</p>
+                                                <p className="text-2xl font-bold text-white">${(taxEstimate.afterTaxIncome / 12).toFixed(0)}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* Crypto Tab */}
+                            {activeTab === 'crypto' && (
+                                <div className="space-y-6">
+                                    <h3 className="text-white font-semibold text-lg">Cryptocurrency Portfolio</h3>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        {cryptoPortfolio.map(crypto => (
+                                            <div key={crypto.symbol} className="glass-dark rounded-xl p-6 card-hover">
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <div>
+                                                        <h4 className="text-white font-bold text-lg">{crypto.symbol}</h4>
+                                                        <p className="text-white/60 text-sm">{crypto.name}</p>
+                                                    </div>
+                                                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                                        crypto.change24h >= 0 ? 'bg-green-500/30 text-green-400' : 'bg-red-500/30 text-red-400'
+                                                    }`}>
+                                                        {crypto.change24h >= 0 ? '+' : ''}{crypto.change24h}%
+                                                    </span>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between">
+                                                        <span className="text-white/70 text-sm">Holdings</span>
+                                                        <span className="text-white">{crypto.amount} {crypto.symbol}</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-white/70 text-sm">Value</span>
+                                                        <span className="text-white font-bold">${crypto.value.toLocaleString()}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    
+                                    <div className="glass-dark rounded-xl p-6">
+                                        <h4 className="text-white font-medium mb-4">Crypto Summary</h4>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                            <div>
+                                                <p className="text-white/70 text-sm">Total Value</p>
+                                                <p className="text-2xl font-bold text-white">
+                                                    ${cryptoPortfolio.reduce((sum, c) => sum + c.value, 0).toLocaleString()}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-white/70 text-sm">24h Change</p>
+                                                <p className="text-2xl font-bold text-green-400">+$125</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-white/70 text-sm">Portfolio %</p>
+                                                <p className="text-2xl font-bold text-blue-400">3.4%</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-white/70 text-sm">Risk Level</p>
+                                                <p className="text-2xl font-bold text-red-400">High</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        
+                        {/* Footer */}
+                        <div className="glass rounded-2xl p-4 mt-6 text-center">
+                            <p className="text-gray-500 text-sm">
+                                <span className="neon-cyan">Personal Finance Command Center</span> © 2024 | 
+                                <span className="text-pink-400"> Advanced Financial Analytics & Management</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        // Render the app
+        ReactDOM.render(<FinanceCommandCenter />, document.getElementById('root'));
+    </script>
+</body>
+</html>
